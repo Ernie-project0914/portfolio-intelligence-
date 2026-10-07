@@ -1,0 +1,1 @@
+CREATE TABLE security_metadata(user_id TEXT NOT NULL REFERENCES users(id),ticker TEXT NOT NULL REFERENCES securities(ticker),name TEXT NOT NULL,sector TEXT NOT NULL,industry TEXT NOT NULL,geography TEXT NOT NULL,origin TEXT NOT NULL DEFAULT 'MANUAL',PRIMARY KEY(user_id,ticker));

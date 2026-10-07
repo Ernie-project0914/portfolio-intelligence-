@@ -1,0 +1,37 @@
+{
+  "name": "portfolio-intelligence",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server/dev.mjs",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "node --import tsx --test tests/*.test.ts tests/*.test.mjs",
+    "test:browser": "playwright test",
+    "start": "node --import tsx server/index.mjs",
+    "db:migrate": "node server/migrate.mjs",
+    "backup": "node server/backup.mjs"
+  },
+  "dependencies": {
+    "@fontsource/dm-sans": "^5.3.0",
+    "@fontsource/manrope": "^5.3.0",
+    "fast-xml-parser": "^5.11.2",
+    "lucide-react": "^0.468.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "recharts": "^3.2.0",
+    "tsx": "^4.20.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.5.0",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  }
+}

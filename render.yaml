@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: folio-portfolio-intelligence
+    runtime: docker
+    plan: starter
+    healthCheckPath: /api/health
+    disk:
+      name: folio-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: FOLIO_HOST
+        value: 0.0.0.0
+      - key: FOLIO_DATA_DIR
+        value: /var/data/folio
+      - key: FOLIO_REGISTRATION_CODE
+        generateValue: true

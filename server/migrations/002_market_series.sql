@@ -1,0 +1,1 @@
+CREATE TABLE market_series(ticker TEXT NOT NULL REFERENCES securities(ticker), date TEXT NOT NULL, adjusted_close REAL NOT NULL CHECK(adjusted_close>0), provider TEXT NOT NULL, fetched_at TEXT NOT NULL, PRIMARY KEY(ticker,date,provider));
