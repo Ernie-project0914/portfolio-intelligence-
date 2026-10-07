@@ -1,0 +1,26 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {browserApi} from '../src/browser-api.mjs';
+test('free website persists validated ledger, quotes, isolated demo and restorable backups',async()=>{
+  const values=new Map();globalThis.localStorage={getItem:k=>values.get(k)||null,setItem:(k,v)=>values.set(k,v)};
+  const call=(p,b)=>browserApi(p,'POST',b);
+  const initial=await browserApi('/state');assert.equal(initial.user.kind,'private');assert.equal(initial.holdings.length,0);
+  await call('/transactions',{accountId:'manual',type:'DEPOSIT',timestamp:'2026-01-01',amount:1000});
+  await call('/transactions',{accountId:'manual',type:'BUY',ticker:'AAPL',timestamp:'2026-01-02',quantity:2,price:180,fees:1});
+  assert.equal((await browserApi('/state')).complete,false);
+  await call('/quotes',{ticker:'AAPL',price:200,previousClose:190});
+  let state=await browserApi('/state');assert.equal(state.cash,639);assert.equal(state.profit,39);assert.equal(state.daily,20);
+  const archive=await browserApi('/export');
+  await assert.rejects(call('/transactions',{accountId:'manual',type:'SELL',ticker:'AAPL',timestamp:'2026-01-03',quantity:3,price:200}),/exceeds/);
+  assert.equal((await browserApi('/state')).transactions.length,2);
+  await call('/auth/demo',{});assert.equal((await browserApi('/state')).holdings.length,7);
+  await assert.rejects(call('/transactions',{accountId:'manual',type:'DEPOSIT',timestamp:'2026-01-01',amount:10}),/Switch/);
+  await call('/browser/portfolio',{});assert.equal((await browserApi('/state')).holdings.length,1);
+  const csv='date,ticker,type,quantity,price,amount,fees,external_id\n2026-01-03,,DEPOSIT,0,0,100,0,extra';
+  const preview=await call('/import',{accountId:'manual',csv,commit:false});assert.equal(preview.added,1);assert.equal((await browserApi('/state')).cash,639);
+  await call('/import',{accountId:'manual',csv,commit:true});assert.equal((await browserApi('/state')).cash,739);
+  assert.equal((await call('/import',{accountId:'manual',csv,commit:true})).skipped,1);
+  await call('/browser/restore',{archive});assert.equal((await browserApi('/state')).cash,639);
+  await call('/assistant',{question:'What is my profit?'});assert.match((await browserApi('/research'))[0].interpretation['CALCULATED OBSERVATIONS'],/39.00/);
+  await call('/briefings',{});await call('/briefings',{});assert.equal((await browserApi('/briefings')).length,1);
+});

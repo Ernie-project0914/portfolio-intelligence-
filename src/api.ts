@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Holding, Security } from "./domain/models";
+declare const __STATIC_SITE__: boolean;
+export const browserWebsite = __STATIC_SITE__;
 export interface LedgerTransaction {
   id: string;
   account_id: string;
@@ -106,6 +108,11 @@ export async function api<T = unknown>(
   method = "GET",
   body?: unknown,
 ): Promise<T> {
+  if (browserWebsite) {
+    // @ts-expect-error Browser adapter shares the tested JavaScript ledger.
+    const { browserApi } = await import("./browser-api.mjs");
+    return browserApi(path, method, body) as Promise<T>;
+  }
   const response = await fetch(`/api${path}`, {
     method,
     credentials: "same-origin",

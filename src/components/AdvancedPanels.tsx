@@ -12,7 +12,7 @@ import {
   CalendarDays,
   CheckCircle2,
 } from "lucide-react";
-import { api, type PortfolioState } from "../api";
+import { api, browserWebsite, type PortfolioState } from "../api";
 import { money, type Holding } from "../domain/models";
 import { Company, Movement } from "./PortfolioUI";
 interface Props {
@@ -826,7 +826,16 @@ export default function AdvancedPanels({ page, data, reload, onStock }: Props) {
       )}
     </section>
   );
-  const news = (
+  const news = browserWebsite ? (
+    <section className="panel">
+      <h2>Latest news sources</h2>
+      <p className="muted">Open current reporting for your holdings and watchlist. This free website links to sources; it does not fetch or invent headlines.</p>
+      {[...new Set([...data.holdings.map(h => h.ticker), ...data.watchlist.map(h => h.ticker)])].map(t => (
+        <div className="connection" key={t}><strong>{t}</strong><a href={`https://finance.yahoo.com/quote/${encodeURIComponent(t)}/news/`} target="_blank" rel="noopener noreferrer">Yahoo Finance news ↗</a><a href={`https://news.google.com/search?q=${encodeURIComponent(t + ' stock')}`} target="_blank" rel="noopener noreferrer">Google News ↗</a></div>
+      ))}
+      {!data.holdings.length && !data.watchlist.length && <p>Add a holding or watchlist ticker to see its news links.</p>}
+    </section>
+  ) : (
     <section className="panel">
       <div className="panel-heading">
         <div>
@@ -888,7 +897,9 @@ export default function AdvancedPanels({ page, data, reload, onStock }: Props) {
       )}
     </section>
   );
-  const connections = (
+  const connections = browserWebsite ? (
+    <section className="panel"><h2>Free browser website</h2><p>Your manual portfolio is stored on this device. No trading account, server subscription or API key is needed. Enter trades in Transactions and current prices in Settings.</p></section>
+  ) : (
     <section className="panel">
       <div className="panel-heading">
         <div>
@@ -1052,7 +1063,12 @@ export default function AdvancedPanels({ page, data, reload, onStock }: Props) {
   );
   const settings = (
     <>
-      <section className="panel">
+      {browserWebsite ? <section className="panel">
+        <h2>Your browser portfolio</h2>
+        <p className="muted">Saved only in this browser, with no account or password. Clearing browser data removes it. Export regular backups; your data does not sync across devices.</p>
+        <div className="action-row"><button className="primary" onClick={() => run(() => api("/browser/portfolio", "POST", {}), "Your browser portfolio opened")}>Open my portfolio</button><button className="secondary" onClick={() => run(() => api("/auth/demo", "POST", {}), "Sample portfolio opened")}>View demo</button><button className="secondary" onClick={exportData}>Export backup</button></div>
+        <label>Restore website backup<input type="file" accept="application/json,.json" onChange={e => { const file=e.target.files?.[0]; if(file) run(async () => { const archive=JSON.parse(await file.text()); await api("/browser/restore", "POST", {archive}); }, "Backup restored"); e.target.value=""; }} /></label>
+      </section> : <section className="panel">
         <h2>Private workspace access</h2>
         <p className="muted">
           {data.user.kind === "demo"
@@ -1146,7 +1162,7 @@ export default function AdvancedPanels({ page, data, reload, onStock }: Props) {
             binding. Never send it in chat. One owner account is permitted.
           </p>
         )}
-      </section>
+      </section>}
       <section className="panel">
         <h2>Workspace settings</h2>
         <form
@@ -1360,14 +1376,14 @@ export default function AdvancedPanels({ page, data, reload, onStock }: Props) {
         <input
           type="checkbox"
           checked={useAI}
+          disabled={browserWebsite}
           onChange={(e) => setUseAI(e.target.checked)}
         />
         Use AI interpretation (requires provider key)
       </label>
       {!data.aiConfigured && (
         <p className="muted">
-          Configure FOLIO_AI_API_KEY securely in environment settings to use
-          OpenAI. No simulated AI answers are presented.
+          {browserWebsite ? "The free website provides calculated portfolio explanations. AI interpretation needs a secure backend; never enter an API key into this public website." : "Configure FOLIO_AI_API_KEY securely in environment settings to use OpenAI. No simulated AI answers are presented."}
         </p>
       )}
       {research.map((r, i) => (

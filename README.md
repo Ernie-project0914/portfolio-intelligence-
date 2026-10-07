@@ -4,7 +4,8 @@ A private, read-only investment command centre built with React, TypeScript, Vit
 
 ## Start and validate
 
-For a browser-accessible hosted app, see [Publish on Render](DEPLOY.md).
+For the free browser-only website, see [GitHub Pages website](WEBSITE.md).
+For the optional server-backed hosted app, see [Publish on Render](DEPLOY.md).
 The included Blueprint deploys the entire service with a persistent database.
 
 Run these commands from `/workspace/portfolio-intelligence-`:

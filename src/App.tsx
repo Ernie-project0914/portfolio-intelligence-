@@ -1,7 +1,7 @@
 import { Company, Movement, signed } from "./components/PortfolioUI";
 import HoldingsTable from "./components/HoldingsTable";
 import { useState, useEffect } from "react";
-import { api, usePortfolio, type PortfolioState } from "./api";
+import { api, browserWebsite, usePortfolio, type PortfolioState } from "./api";
 import StockFacts from "./components/StockFacts";
 import AdvancedPanels from "./components/AdvancedPanels";
 import {
@@ -462,6 +462,7 @@ function Workspace({
                 className="secondary"
                 onClick={async () => {
                   try {
+                    if (browserWebsite) { await reload(); setNotice("Browser portfolio refreshed. Current prices are entered in Settings."); return; }
                     const result = await api<{
                       updated: number;
                       errors?: { message: string }[];
@@ -503,6 +504,7 @@ function Workspace({
                   : "Incomplete valuation • unpriced positions"}
             </span>
           </div>
+          {browserWebsite && <div className="notice">Free website • saved in this browser only. Export backups in Settings. Daily briefings update while the site is open; News contains current source links.</div>}
           {notice && (
             <div className="notice" role="status">
               {notice}

@@ -1,6 +1,8 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 export default defineConfig({
+  base: process.env.VITE_SITE_BASE || "/",
+  define: { __STATIC_SITE__: JSON.stringify(process.env.VITE_STATIC_SITE === "true") },
   plugins: [react()],
   server: {
     fs: {
