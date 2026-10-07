@@ -15,6 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Configure GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v5
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -24,7 +27,9 @@ jobs:
       - run: npm run build
         env:
           VITE_STATIC_SITE: 'true'
-          VITE_SITE_BASE: /portfolio-intelligence-/
+          VITE_SITE_BASE: ${{ steps.pages.outputs.base_path }}/
+      - name: Validate website assets
+        run: node scripts/check-website.mjs
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
@@ -38,3 +43,5 @@ jobs:
       - name: Deploy website
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Show website address
+        run: echo "Website published at ${{ steps.deployment.outputs.page_url }}" >> "$GITHUB_STEP_SUMMARY"
